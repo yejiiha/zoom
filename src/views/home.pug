@@ -5,27 +5,49 @@ html(lang="en")
         meta(http-equiv="X-UA-Compatible", content="IE=edge")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         title ZoomClone
-        link(rel="stylesheet", href="https://unpkg.com/mvp.css")
+        //- link(rel="stylesheet", href="https://unpkg.com/mvp.css")
+        link(rel="stylesheet", href="style.css")
+    style  
+        include style.css
+
     body 
         header 
             H1 Z👀m
         main 
-            div#welcome
-                form   
-                    input#roomName(placeholder="Room name", required, type="text")
-                    input#nickname(placeholder="Nickname", required, type="text")
+            div#welcome 
+                form 
+                    div.box
+                        div.inputBox
+                            b Write a Room Name 
+                            input#roomName(placeholder="Room name", required, type="text")
+                        
+                        div.inputBox
+                            b Write a Nickname 
+                            input#nickname(placeholder="Nickname", required, type="text")
                     button Enter Room
+                
+                h3 👀 Open Rooms: 
+                ul 
         
             div#room
-                h3 
+                header
+                    div
+                    h3 
+                    button#exit Exit
                 ul  
+
+                form#msg
+                    //- h3 💌 Send a Message 
+                    input(placeholder="message", required, type="text")
+                    button Send
+
+
                 form#name
+                    h3 😁 Your Nickname
                     input(placeholder="Nickname", required, type="text")
                     button Change
 
-                form#msg
-                    input(placeholder="message", required, type="text")
-                    button Send
+                
 
 
         script(src="/socket.io/socket.io.js")
