@@ -1,43 +1,78 @@
-const socket = new WebSocket(`ws://${window.location.host}`);
+const socket = io(); // socket.io를 실행하고 있는 서버를 찾음
 
-const messageList = document.querySelector("ul");
-const messageForm = document.querySelector("#message");
-const nickForm = document.querySelector("#nickname");
+const welcome = document.getElementById("welcome");
+const welcomeForm = welcome.querySelector("form");
+const room = document.getElementById("room");
+const changeNameInput = room.querySelector("#name input");
 
-const makeMessage = (type, payload) => {
-  const msg = { type, payload };
-  return JSON.stringify(msg);
+room.hidden = true;
+
+let roomName;
+
+const addMessage = (message) => {
+  const ul = room.querySelector("ul");
+  const li = document.createElement("li");
+
+  li.innerText = message;
+
+  ul.appendChild(li);
 };
 
-socket.addEventListener("open", () => {
-  console.log("Connected to Server! ✅");
-});
+const handleMessageSubmit = (e) => {
+  e.preventDefault();
 
-socket.addEventListener("message", (message) => {
-  const list = document.createElement("li");
-  list.innerText = message.data;
-  messageList.append(list);
-});
+  const input = room.querySelector("#msg input");
+  const value = input.value;
 
-socket.addEventListener("close", () => {
-  console.log("Disconnected to Server! ❌");
-});
-
-const handleMessageSubmit = (event) => {
-  event.preventDefault();
-  const input = messageForm.querySelector("input");
-
-  socket.send(makeMessage("new_message", String(input.value)));
+  socket.emit("newMessage", input.value, roomName, () => {
+    addMessage(`You(${changeNameInput.value}): ${value}`);
+  }); // 백엔드로 메세지 보내기
 
   input.value = "";
 };
 
-const handleNickSubmit = (event) => {
-  event.preventDefault();
-  const input = nickForm.querySelector("input");
+const handleNameSubmit = (e) => {
+  e.preventDefault();
 
-  socket.send(makeMessage("nickname", String(input.value)));
+  const input = room.querySelector("#name input");
+  const value = input.value;
+
+  socket.emit("nickname", input.value); // 닉네임 저장하기
+
+  // input.value = "";
 };
 
-messageForm.addEventListener("submit", handleMessageSubmit);
-nickForm.addEventListener("submit", handleNickSubmit);
+const showRoom = () => {
+  welcome.hidden = true;
+  room.hidden = false;
+
+  const h3 = room.querySelector("h3");
+  h3.innerText = `ROOM: ${roomName}`;
+
+  const msgForm = room.querySelector("#msg");
+  const nameForm = room.querySelector("#name");
+
+  msgForm.addEventListener("submit", handleMessageSubmit);
+  nameForm.addEventListener("submit", handleNameSubmit);
+};
+
+const handleRoomSubmit = (e) => {
+  e.preventDefault();
+  const roomNameInput = welcomeForm.querySelector("#roomName");
+  const nickNameInput = welcomeForm.querySelector("#nickname");
+
+  socket.emit("enterRoom", roomNameInput.value, nickNameInput.value, showRoom);
+
+  roomName = roomNameInput.value;
+  roomNameInput.value = "";
+
+  changeNameInput.value = nickNameInput.value;
+};
+
+welcomeForm.addEventListener("submit", handleRoomSubmit);
+
+socket.on("welcome", (user) => addMessage(`${user} joined! 😀`));
+
+socket.on("bye", (left) => addMessage(`${left} left... 😭`));
+
+socket.on("newMessage", addMessage);

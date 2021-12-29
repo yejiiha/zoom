@@ -10,13 +10,23 @@ html(lang="en")
         header 
             H1 Z👀m
         main 
-            form#nickname   
-                input(type="text", placeholder="choose a nickname", required)
-                button Save
-
-            ul  
-            form#message
-                input(type="text", placeholder="write a message", required)
-                button Send
+            div#welcome
+                form   
+                    input#roomName(placeholder="Room name", required, type="text")
+                    input#nickname(placeholder="Nickname", required, type="text")
+                    button Enter Room
         
+            div#room
+                h3 
+                ul  
+                form#name
+                    input(placeholder="Nickname", required, type="text")
+                    button Change
+
+                form#msg
+                    input(placeholder="message", required, type="text")
+                    button Send
+
+
+        script(src="/socket.io/socket.io.js")
         script(src="/public/js/app.js")
