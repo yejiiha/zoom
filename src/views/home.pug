@@ -5,28 +5,51 @@ html(lang="en")
         meta(http-equiv="X-UA-Compatible", content="IE=edge")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         title ZoomClone
-        link(rel="stylesheet", href="https://unpkg.com/mvp.css")
+        link(rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous")
+        //- link(rel="stylesheet", href="https://unpkg.com/mvp.css")
         //- link(rel="stylesheet", href="style.css")
     style  
-        //- include style.css
+        include style.css
 
     body 
         header 
             H1 Z👀m
         main
             div#welcome
-                form
-                    input(placeholder="Room Name", required, type="text")  
+                form 
+                    div.box
+                        div.inputBox
+                            b Write a Room Name 
+                            input#roomName(placeholder="Room name", required, type="text")
+                        
+                        div.inputBox
+                            b Write a Nickname 
+                            input#nickname(placeholder="Nickname", required, type="text")
                     button Enter Room
-            div#call
-                div#myStream
-                    video#myFace(autoplay, playsinline, muted, width="400", height="400")
-                    button#mute Mute
-                    button#camera Turn Camera Off
-                    select#cameras
-                
-                video#peerFace(autoplay, playsinline, muted, width="400", height="400")
 
+            div#call
+                h2
+               
+                div#videoContainer
+                    div#videos
+                        div#myStream
+                            div.videoColumn
+                                h3
+                                video#myFace(autoplay, playsinline, muted, width="350", height="350")
+                        div.videoColumn
+                            h3 Anonymous   
+                            video#peerFace(autoplay, playsinline, muted, width="350", height="350")
+                    
+                    div#setting 
+                        div.column
+                            button#mute 
+                                i.fas.fa-volume-mute(aria-hidden='true') 
+                            button#camera 
+                                i.fas.fa-video(aria-hidden='true') 
+                            select#cameras
+                        div.column
+                             button#chat
+                                i.fas.fa-comment(aria-hidden='true') 
                 
         script(src="/socket.io/socket.io.js")
         script(src="/public/js/app.js")

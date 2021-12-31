@@ -14,6 +14,7 @@ let muted = false;
 let cameraOff = false;
 let roomName;
 let myPeerConnection;
+let nickName;
 
 const getCameras = async () => {
   try {
@@ -42,6 +43,8 @@ const getMedia = async (deviceId) => {
   const initConstrains = {
     audio: true,
     video: {
+      width: { max: 350 },
+      height: { max: 350 },
       facingMode: "user",
     },
   };
@@ -51,6 +54,8 @@ const getMedia = async (deviceId) => {
       deviceId: {
         exact: deviceId,
       },
+      width: { max: 350 },
+      height: { max: 350 },
     },
   };
 
@@ -77,10 +82,14 @@ const handleMuteClick = () => {
   console.log(myStream.getAudioTracks());
 
   if (!muted) {
-    muteBtn.innerText = "Unmute";
+    // muteBtn.innerText = "Unmute";
+    muteBtn.innerHTML = "<i class='fas fa-volume-off' aria-hidden='true'></i>";
+
     muted = true;
   } else {
-    muteBtn.innerText = "Mute";
+    // muteBtn.innerText = "Mute";
+    muteBtn.innerHTML = "<i class='fas fa-volume-mute' aria-hidden='true'></i>";
+
     muted = false;
   }
 };
@@ -91,16 +100,30 @@ const handleCameraClick = () => {
     .forEach((track) => (track.enabled = !track.enabled));
 
   if (cameraOff) {
-    cameraBtn.innerText = "Turn Camera Off";
+    cameraBtn.innerHTML = "<i class='fas fa-video' aria-hidden='true'></i>";
+    // cameraBtn.innerText = "Turn Camera Off";
     cameraOff = false;
   } else {
-    cameraBtn.innerText = "Turn Camera On";
+    // cameraBtn.innerText = "Turn Camera On";\
+    cameraBtn.innerHTML =
+      "<i class='fas fa-video-slash' aria-hidden='true'></i>";
     cameraOff = true;
   }
 };
 
 const handleCameraChange = async () => {
   await getMedia(camerasSelect.value);
+
+  const videoTrack = myStream.getVideoTracks()[0];
+
+  if (myPeerConnection) {
+    // sender: 다른 브라우저로 보내진 비디오와 오디오 데이터를 컨르롤 하는 방법
+    const videoSender = myPeerConnection
+      .getSenders()
+      .find((sender) => sender.track.kind === "video");
+
+    videoSender.replaceTrack(videoTrack);
+  }
 };
 
 muteBtn.addEventListener("click", handleMuteClick);
@@ -124,14 +147,24 @@ const initCall = async () => {
 const handelWelcomeSubmit = async (e) => {
   e.preventDefault();
 
-  const input = welcomeForm.querySelector("input");
+  const roomNameInput = welcomeForm.querySelector("#roomName");
+  const nickNameInput = welcomeForm.querySelector("#nickname");
 
   await initCall();
 
-  socket.emit("joinRoom", input.value);
-  roomName = input.value;
+  socket.emit("joinRoom", roomNameInput.value, nickNameInput.value);
 
-  input.value = "";
+  roomName = roomNameInput.value;
+  nickName = nickNameInput.value;
+
+  const h2 = call.querySelector("h2");
+  h2.innerText = `${roomName}`;
+
+  const h3 = call.querySelector("#myStream h3");
+  h3.innerText = `You: ${nickName}`;
+
+  roomNameInput.value = "";
+  nickNameInput.value = "";
 };
 
 welcomeForm.addEventListener("submit", handelWelcomeSubmit);
@@ -179,8 +212,29 @@ socket.on("ice", (ice) => {
 });
 
 // RTC Code
+const peerFace = document.getElementById("peerFace");
+console.log(peerFace);
+console.log();
+
+if (!peerFace.srcObject) {
+  peerFace.innerText = "Waiting...";
+}
+
 const makeConnection = () => {
-  myPeerConnection = new RTCPeerConnection();
+  myPeerConnection = new RTCPeerConnection({
+    iceServers: [
+      {
+        urls: [
+          "stun:stun.l.google.com:19302",
+          "stun:stun1.l.google.com:19302",
+          "stun:stun2.l.google.com:19302",
+          "stun:stun3.l.google.com:19302",
+          "stun:stun4.l.google.com:19302",
+        ],
+      },
+    ],
+  });
+  // myPeerConnection = new RTCPeerConnection();
   myPeerConnection.addEventListener("icecandidate", handleIce);
   myPeerConnection.addEventListener("addstream", handleAddStream);
   myStream
@@ -198,6 +252,6 @@ const handleAddStream = (data) => {
   console.log("peer's stream: ", data.stream);
   console.log("my stream: ", myStream);
 
-  const peerFace = document.getElementById("peerFace");
   peerFace.srcObject = data.stream;
+  console.log(peerFace.srcObject);
 };

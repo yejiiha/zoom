@@ -1,3 +1,9 @@
+@import "./css/reset.css";
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   width: 100vw;
   display: flex;
@@ -5,6 +11,9 @@ body {
   justify-content: center;
   align-items: center;
   margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 main {
@@ -19,6 +28,13 @@ form {
 input {
   color: black;
   font-size: 14px;
+
+  border: none;
+  outline: none;
+  margin-top: 10px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  background-color: #f6f6f6;
 }
 
 ul {
@@ -42,17 +58,93 @@ button:hover {
   background-color: #feab37;
 }
 
+i {
+  font-size: 14px;
+  color: white;
+}
+
+select {
+  color: black;
+  font-size: 14px;
+
+  border: none;
+  outline: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  background-color: #f6f6f6;
+}
+
 #welcome form {
-  margin-bottom: 80px;
+  margin-top: 80px;
+}
+
+#welcome b {
+  margin-bottom: 8px;
+}
+
+#welcome input {
+  margin-bottom: 12px;
+  margin-top: 0px;
+  width: 100%;
+  padding: 16px 24px;
+  border-radius: 8px;
+
+  font-size: 16px;
 }
 
 #welcome button {
+  margin-top: 40px;
   width: 100%;
+}
+
+#videoContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#videos {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#videos h3 {
+  margin-bottom: 0;
+}
+
+@media screen and (max-width: 768px) {
+  #videos {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #setting {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+#setting {
+  /* width: 80%; */
+  margin-top: 30px;
+  border: 1px solid #d3d3d3;
+  border-radius: 4px;
+  padding: 8px 16px;
+  display: flex;
+  /* justify-content: space-between; */
+  align-items: center;
+}
+
+#peerFace {
+  background-color: #4a4a4a;
+  color: white;
 }
 
 .box {
   width: 100%;
-  margin-bottom: 20px;
 }
 
 .inputBox {
@@ -64,13 +156,12 @@ button:hover {
   margin-bottom: 15px;
 }
 
-.inputBox input {
-  border: none;
-  outline: none;
-  margin-top: 10px;
-  padding: 8px 16px;
-  border-radius: 4px;
-  background-color: #f6f6f6;
+#setting button {
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+  border-radius: 50%;
+  margin-right: 10px;
 }
 
 #room header {
