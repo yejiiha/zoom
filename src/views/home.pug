@@ -6,8 +6,7 @@ html(lang="en")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         title ZoomClone
         link(rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous")
-        //- link(rel="stylesheet", href="https://unpkg.com/mvp.css")
-        //- link(rel="stylesheet", href="style.css")
+       
     style  
         include style.css
 
@@ -26,30 +25,40 @@ html(lang="en")
                             b Write a Nickname 
                             input#nickname(placeholder="Nickname", required, type="text")
                     button Enter Room
+                
+                div#errorMessage
 
-            div#call
-                h2
-               
-                div#videoContainer
-                    div#videos
-                        div#myStream
-                            div.videoColumn
-                                h3
-                                video#myFace(autoplay, playsinline, muted, width="350", height="350")
-                        div.videoColumn
-                            h3 Anonymous   
-                            video#peerFace(autoplay, playsinline, muted, width="350", height="350")
-                    
-                    div#setting 
-                        div.column
-                            button#mute 
-                                i.fas.fa-volume-mute(aria-hidden='true') 
-                            button#camera 
-                                i.fas.fa-video(aria-hidden='true') 
-                            select#cameras
-                        div.column
-                             button#chat
-                                i.fas.fa-comment(aria-hidden='true') 
+            div#call  
+                div#room
+                    div#videoContainer
+                        div#videos
+                            div#myStream
+                                div.videoColumn
+                                    h3
+                                    video#myFace(autoplay, playsinline, muted, )
+                            div.videoColumn#peerColumn
+                                h3 Anonymous   
+                                video#peerFace(autoplay, playsinline, muted, )
+                        
+                        div#setting 
+                            div.column
+                                button#mute 
+                                    i.fas.fa-volume-mute(aria-hidden='true') 
+                                button#camera 
+                                    i.fas.fa-video(aria-hidden='true') 
+                                select#cameras
+                            div.column
+                                button#exit Exit
+                                    
+
+                    div#chatContainer
+                        div
+                            span
+                        ul
+                        form
+                            input(type="text", placeholder="Type message here...")
+                            button#send
+                                i.far.fa-paper-plane(aria-hidden='true') 
                 
         script(src="/socket.io/socket.io.js")
         script(src="/public/js/app.js")

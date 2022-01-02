@@ -23,15 +23,49 @@ const handleListen = () => console.log(`✨ Listening on http://localhost:3000`)
 const httpServer = http.createServer(app); // http 서버에 access 하기
 const wsServer = SocketIO(httpServer);
 
+const countRoom = (roomName) => {
+  return wsServer.sockets.adapter.rooms.get(roomName)?.size;
+};
+
+const publicRooms = () => {
+  const {
+    sockets: {
+      adapter: { sids, rooms },
+    },
+  } = wsServer;
+
+  const publicRoomList = [];
+
+  rooms.forEach((_, key) => {
+    if (sids.get(key) === undefined) {
+      publicRoomList.push(key);
+    }
+  });
+
+  return publicRoomList;
+};
+
 wsServer.on("connection", (socket) => {
+  socket["nickname"] = "Anonymous";
+
   socket.onAny((event) => {
     console.log(`Socket Event: ${event}`);
   });
 
-  socket.on("joinRoom", (roomName) => {
-    socket.join(roomName);
+  socket.on("askCheckCount", (roomName, nickname) => {
+    const userCount = wsServer.sockets.adapter.rooms.get(roomName)?.size;
+    console.log(userCount);
 
-    socket.to(roomName).emit("welcome");
+    // send userCount to client
+    socket.emit("sendUserCount", userCount);
+  });
+
+  socket.on("joinRoom", (roomName, nickname, errorMessage) => {
+    console.log("nickname: ", nickname);
+    socket["nickname"] = nickname;
+
+    socket.join(roomName);
+    socket.to(roomName).emit("welcome", socket.nickname, countRoom(roomName));
   });
 
   socket.on("offer", (offer, roomName) => {
@@ -44,6 +78,27 @@ wsServer.on("connection", (socket) => {
 
   socket.on("ice", (ice, roomName) => {
     socket.to(roomName).emit("ice", ice);
+  });
+
+  // 채팅 방과 연결 끊기
+  socket.on("disconnecting", () => {
+    socket.rooms.forEach((room) =>
+      socket.to(room).emit("bye", socket.nickname, countRoom(room) - 1)
+    );
+  });
+
+  socket.on("disconnect", () => {
+    wsServer.sockets.emit("roomChange", publicRooms());
+  });
+
+  socket.on("exit", (nickname, room) => {
+    socket.rooms.forEach((room) =>
+      socket.to(room).emit("bye", socket.nickname, countRoom(room) - 1)
+    );
+
+    socket.leave(room);
+
+    wsServer.sockets.emit("roomChange", publicRooms());
   });
 });
 

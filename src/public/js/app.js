@@ -1,11 +1,19 @@
 const socket = io(); // socket.io를 실행하고 있는 서버를 찾음
 
+const header = document.querySelector("header");
+const main = document.querySelector("main");
 const myFace = document.getElementById("myFace");
 const muteBtn = document.getElementById("mute");
 const cameraBtn = document.getElementById("camera");
 const camerasSelect = document.getElementById("cameras");
+const chatForm = document.querySelector("#chatContainer form");
+const exitBtn = document.getElementById("exit");
 
+const ul = room.querySelector("#chatContainer ul");
 const call = document.getElementById("call");
+
+const chatTitle = call.querySelector("span");
+const peerFace = document.getElementById("peerFace");
 
 call.hidden = true;
 
@@ -15,6 +23,7 @@ let cameraOff = false;
 let roomName;
 let myPeerConnection;
 let nickName;
+let myDataChannel;
 
 const getCameras = async () => {
   try {
@@ -139,32 +148,58 @@ const initCall = async () => {
   welcome.hidden = true;
   call.hidden = false;
 
+  header.hidden = true;
+
+  main.style.maxWidth = "100vw";
+  main.style.width = "100%";
+
   await getMedia();
 
   makeConnection();
 };
 
-const handelWelcomeSubmit = async (e) => {
+const handelWelcomeSubmit = (e) => {
   e.preventDefault();
 
   const roomNameInput = welcomeForm.querySelector("#roomName");
   const nickNameInput = welcomeForm.querySelector("#nickname");
 
-  await initCall();
+  // userCount 체크
+  socket.emit("askCheckCount", roomNameInput.value, nickNameInput.value);
 
-  socket.emit("joinRoom", roomNameInput.value, nickNameInput.value);
+  socket.on("sendUserCount", async (userCount) => {
+    console.log(userCount);
+    if (userCount > 1) {
+      // show errorMessage
+      const errorMessage = document.getElementById("errorMessage");
+      console.log(errorMessage);
+      errorMessage.innerText =
+        "Exceed Max Capacity of Room 😥 Enter Another Room please 😉";
+    } else {
+      await initCall();
 
-  roomName = roomNameInput.value;
-  nickName = nickNameInput.value;
+      socket.emit(
+        "joinRoom",
+        roomNameInput.value,
+        nickNameInput.value,
+        (error) => {
+          console.log(error);
+        }
+      );
 
-  const h2 = call.querySelector("h2");
-  h2.innerText = `${roomName}`;
+      roomName = roomNameInput.value;
+      nickName = nickNameInput.value;
 
-  const h3 = call.querySelector("#myStream h3");
-  h3.innerText = `You: ${nickName}`;
+      const chatTitle = call.querySelector("span");
+      chatTitle.innerText = `${roomName} chat`;
 
-  roomNameInput.value = "";
-  nickNameInput.value = "";
+      const h3 = call.querySelector("#myStream h3");
+      h3.innerText = `You: ${nickName}`;
+
+      roomNameInput.value = "";
+      nickNameInput.value = "";
+    }
+  });
 };
 
 welcomeForm.addEventListener("submit", handelWelcomeSubmit);
@@ -172,8 +207,25 @@ welcomeForm.addEventListener("submit", handelWelcomeSubmit);
 // Socket code
 
 // Run on peer A
-socket.on("welcome", async () => {
-  console.log("someone joined");
+socket.on("welcome", async (user, newCount) => {
+  console.log("welcome!!");
+
+  chatTitle.innerText = `${roomName}(${newCount}) chat`;
+
+  addMessage(`${user} joined! 😀`, "noti");
+
+  const peerName = document.querySelector("#peerColumn h3");
+
+  peerName.innerText = user;
+
+  myDataChannel = myPeerConnection.createDataChannel("chat");
+  myDataChannel.addEventListener("message", (e) => {
+    // b 한테 받는 메세지
+    console.log(e.data);
+
+    addMessage(e.data, "receive");
+  });
+
   // 다른 브라우저가 참가하도록 offer 만들기
   const offer = await myPeerConnection?.createOffer();
   myPeerConnection?.setLocalDescription(offer);
@@ -184,6 +236,17 @@ socket.on("welcome", async () => {
 
 // Run on peer B
 socket.on("offer", async (offer) => {
+  myPeerConnection.addEventListener("datachannel", (event) => {
+    myDataChannel = event.channel;
+    myDataChannel.addEventListener("message", (e) => {
+      // ul.style.alignItems = "flex-start";
+
+      // 받는 메세지
+      console.log(e.data);
+      addMessage(e.data, "receive");
+    });
+  });
+
   console.log("received the offer");
   // peer A가 보낸 offer 받기
   myPeerConnection?.setRemoteDescription(offer);
@@ -211,14 +274,13 @@ socket.on("ice", (ice) => {
   myPeerConnection.addIceCandidate(ice);
 });
 
-// RTC Code
-const peerFace = document.getElementById("peerFace");
-console.log(peerFace);
-console.log();
+socket.on("bye", (left, newCount) => {
+  chatTitle.innerText = `${roomName}(${newCount}) chat`;
 
-if (!peerFace.srcObject) {
-  peerFace.innerText = "Waiting...";
-}
+  addMessage(`${left} left... 😭`, "noti");
+});
+
+// RTC Code
 
 const makeConnection = () => {
   myPeerConnection = new RTCPeerConnection({
@@ -240,6 +302,48 @@ const makeConnection = () => {
   myStream
     .getTracks()
     .forEach((track) => myPeerConnection.addTrack(track, myStream));
+
+  chatForm.addEventListener("submit", handleMessage);
+};
+
+const addMessage = (message, status) => {
+  const li = document.createElement("li");
+
+  console.log(status);
+
+  li.innerText = message;
+
+  ul.appendChild(li);
+
+  switch (status) {
+    case "send":
+      li.style.textAlign = "right";
+      console.log(li);
+
+    case "receive":
+      li.style.textAlign = "left";
+
+    case "noti":
+      li.style.textAlign = "center";
+
+    default:
+      li.style.textAlign = "center";
+  }
+};
+
+const handleMessage = (e) => {
+  e.preventDefault();
+
+  const input = document.querySelector("#chatContainer input");
+  const value = input.value;
+
+  myDataChannel?.send(value);
+  // 보낸 메세지
+  console.log(value);
+
+  addMessage(`You: ${value}`, "send");
+
+  input.value = "";
 };
 
 const handleIce = (data) => {
@@ -255,3 +359,11 @@ const handleAddStream = (data) => {
   peerFace.srcObject = data.stream;
   console.log(peerFace.srcObject);
 };
+
+const exitClick = (e) => {
+  socket.emit("exit", nickName, roomName);
+  welcome.hidden = false;
+  call.hidden = true;
+};
+
+exitBtn.addEventListener("click", exitClick);

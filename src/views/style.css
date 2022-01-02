@@ -31,6 +31,7 @@ input {
 
   border: none;
   outline: none;
+  margin: 0 !important;
   margin-top: 10px;
   padding: 8px 16px;
   border-radius: 4px;
@@ -64,6 +65,7 @@ i {
 }
 
 select {
+  width: 40%;
   color: black;
   font-size: 14px;
 
@@ -97,50 +99,101 @@ select {
   width: 100%;
 }
 
-#videoContainer {
+#errorMessage {
+  margin-top: 30px;
+  color: #e61111;
+  font-weight: 500;
+  text-align: center;
+  font-size: 14px;
+}
+
+/*  ###################### room ###################### */
+
+#room {
   width: 100%;
+  height: 100vh;
+  display: flex;
+}
+
+#videoContainer {
+  width: 75%;
+  height: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  background-color: #222222;
+}
+
+#chatContainer {
+  width: 25%;
+  height: 100%;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+#chatContainer div {
+  height: 45px;
+  display: flex;
   align-items: center;
+  justify-content: center;
+}
+
+#chatContainer span {
+  font-weight: 500;
+  font-size: 16px;
+}
+
+#chatContainer form {
+  display: flex;
+  align-items: center;
+  background-color: #f6f6f6;
+}
+
+#myStream {
+  margin-right: 10px;
 }
 
 #videos {
   width: 100%;
+  height: 100%;
   display: flex;
+  justify-content: center;
   align-items: center;
-  justify-content: space-between;
 }
 
 #videos h3 {
+  color: white;
   margin-bottom: 0;
-}
-
-@media screen and (max-width: 768px) {
-  #videos {
-    display: flex;
-    flex-direction: column;
-  }
-
-  #setting {
-    display: flex;
-    flex-direction: column;
-  }
+  position: relative;
+  bottom: -350px;
+  left: 10px;
+  font-size: 14px;
+  font-weight: 400;
 }
 
 #setting {
-  /* width: 80%; */
   margin-top: 30px;
-  border: 1px solid #d3d3d3;
+  background-color: #252525;
   border-radius: 4px;
   padding: 8px 16px;
   display: flex;
-  /* justify-content: space-between; */
+  justify-content: space-between;
   align-items: center;
 }
 
-#peerFace {
-  background-color: #4a4a4a;
-  color: white;
+.column:first-child {
+  width: 100%;
+}
+
+video {
+  margin-top: 10px;
+  border: 1px solid #4a4a4a;
+  max-width: 350px;
+  width: 100%;
+  min-height: 350px;
+  height: auto;
 }
 
 .box {
@@ -156,7 +209,8 @@ select {
   margin-bottom: 15px;
 }
 
-#setting button {
+#setting button,
+#send {
   width: 36px;
   height: 36px;
   padding: 8px;
@@ -172,13 +226,14 @@ select {
 
 #exit {
   background-color: #e61111;
-  padding: 8px 10px;
-  border-radius: 6px;
-  height: 32px;
+  padding: 8px 10px !important;
+  border-radius: 6px !important;
+  height: 32px !important;
+  width: auto !important;
 }
 
 #exit:hover {
-  background-color: #d62121;
+  background-color: #eb4040;
 }
 
 #room header h3 {
@@ -186,14 +241,13 @@ select {
 }
 
 #room ul {
-  height: 300px;
+  height: 90%;
   overflow-y: scroll;
   max-width: 100%;
   border: 1px solid #e3e3e3;
   display: flex;
   flex-direction: column;
   padding: 8px;
-  border-radius: 4px;
   margin: 0;
 }
 
@@ -208,38 +262,44 @@ select {
   color: rgb(36, 36, 40);
   background-color: rgba(0, 0, 0, 0.05);
   margin: 0;
+  margin-bottom: 6px;
 }
 
 #room input {
+  width: 100%;
+  height: 50px;
   border: none;
   outline: none;
   margin-top: 10px;
   padding: 8px 16px;
   border-radius: 4px;
   background-color: #f6f6f6;
-  margin-left: 10px;
 }
 
-#msg {
-  display: flex;
-  align-items: center;
-}
+@media screen and (max-width: 768px) {
+  #videos {
+    display: flex;
+    flex-direction: column;
+  }
 
-#msg input {
-  width: 90%;
-  margin: 0;
-}
+  #setting {
+    display: flex;
+  }
 
-#msg button {
-  padding: 4px;
-  border-radius: 4px;
-  height: 32px;
-  width: 20%;
+  #room {
+    flex-direction: column;
+  }
 
-  font-size: 14px;
-}
+  #videoContainer {
+    width: 100vw;
+    min-height: 900px;
+  }
 
-#name input {
-  padding: 1rem 16px;
-  margin-right: 10px;
+  #chatContainer {
+    width: 100vw;
+  }
+
+  #room ul {
+    min-height: 300px;
+  }
 }
